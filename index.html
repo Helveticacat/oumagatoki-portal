@@ -611,6 +611,8 @@ body{background:#0b0e13;color:var(--text);font-family:"Hiragino Kaku Gothic ProN
 .hero--carriage .hero__symbol svg{width:37px;height:37px}
 /* Officer mark in legend now matches the exact gold ✦ inside date cells. */
 .content--calendar .legend{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.content--calendar .officer-monthly-counts{margin-top:8px;color:var(--muted);font-size:11px}
+.officer-monthly-counts span{white-space:nowrap}
 .content--calendar .legend-leader-mark{display:inline-block;color:var(--v24-gold-light,#e7c994);font-size:14px;line-height:1;vertical-align:-1px;margin-right:1px}
 /* Light-mode overrides are left intact. Keep decorative photo seamless. */
 
@@ -1156,6 +1158,16 @@ function showCarriageName(day){
   modal={type:'carriageName',day,name,officer:day%7===0};
   render();
 }
+function officerMonthlyCounts(){
+  const sample = [3, 2, 2, 0, 3, 3, 2, 2];
+  // Rotate the fictional counts around the November 2026 preview.
+  const monthsFromPreview = (year - 2026) * 12 + month - 10;
+  const offset = (monthsFromPreview % sample.length + sample.length) % sample.length;
+  const counts = sample.map((_, i) =>
+    `<span>幹部${'ABCDEFGH'[i]}：${sample[(i + offset) % sample.length]}</span>`
+  ).join(' ／ ');
+  return `<p class="officer-monthly-counts">${month + 1}月の幹部担当回数（サンプル）<br>${counts}</p>`;
+}
 function calendarPage(){
   const first=(new Date(year,month,1).getDay()+6)%7;
   const days=new Date(year,month+1,0).getDate();
@@ -1168,7 +1180,7 @@ function calendarPage(){
     const name=v23CalendarName(day);
     cells+=`<div class="day ${out?'out':''} ${weekday===5?'sat':''} ${weekday===6?'sun':''} ${today?'today':''}" ${today?'aria-current="date"':''}><span class="date">${dt.getDate()}</span>${out?'':`<button type="button" class="who ${officer?'leader':''}" onclick="showCarriageName(${day})" aria-label="${month+1}月${day}日 担当者 ${e(name)} の詳細を表示" title="${e(name)}"><span class="who-text">${officer?'✦ ':''}${e(name)}</span></button>`}</div>`;
   }
-  return `${hero('ギルド馬車','GUILD CARRIAGE')}<main class="content content--calendar"><div class="month"><button type="button" onclick="moveMonth(-1)" aria-label="前月へ">‹</button><strong class="latin">${year}.${String(month+1).padStart(2,'0')}</strong><button type="button" onclick="moveMonth(1)" aria-label="翌月へ">›</button></div><div class="calendar" role="group" aria-label="${year}年${month+1}月の馬車当番表">${V22_WEEKDAYS.map((day,i)=>`<div class="weekday ${i===5?'sat':''} ${i===6?'sun':''}">${day}</div>`).join('')}${cells}</div><div class="legend"><span><i class="legend-dot"></i> 一般メンバー</span><span><span class="legend-leader-mark" aria-hidden="true">✦</span> 幹部（サンプル）</span></div><p class="calendar-help">長い名前は2行で省略表示。名前をタップすると全文を確認できます。</p><p class="note demo-note">閲覧専用デモです。名前・幹部区分はサンプルで、Googleスプレッドシートとは連携していません。</p></main>`;
+  return `${hero('ギルド馬車','GUILD CARRIAGE')}<main class="content content--calendar"><div class="month"><button type="button" onclick="moveMonth(-1)" aria-label="前月へ">‹</button><strong class="latin">${year}.${String(month+1).padStart(2,'0')}</strong><button type="button" onclick="moveMonth(1)" aria-label="翌月へ">›</button></div><div class="calendar" role="group" aria-label="${year}年${month+1}月の馬車当番表">${V22_WEEKDAYS.map((day,i)=>`<div class="weekday ${i===5?'sat':''} ${i===6?'sun':''}">${day}</div>`).join('')}${cells}</div><div class="legend"><span><i class="legend-dot"></i> 一般メンバー</span><span><span class="legend-leader-mark" aria-hidden="true">✦</span> 幹部（サンプル）</span></div>${role==='officer'?officerMonthlyCounts():''}<p class="calendar-help">長い名前は2行で省略表示。名前をタップすると全文を確認できます。</p><p class="note demo-note">閲覧専用デモです。名前・幹部区分はサンプルで、Googleスプレッドシートとは連携していません。</p></main>`;
 }
 const v23OldModalUI=modalUI;
 modalUI=function(){
